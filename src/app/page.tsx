@@ -10,13 +10,36 @@ import { useRef } from "react";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SignaturePad = dynamic<any>(() => import("react-signature-canvas"), { ssr: false });
 
+type FormState = {
+  studentName: string;
+  studentNumber: string;
+  studentDOB: string;
+  studentBuilding: string;
+  studentRoom: string;
+  studentSignature: string;
+  parentName: string;
+  parentContact: string;
+  parentAltContact: string;
+  parentAddress: string;
+  parentRelation: string;
+  altEmergencyName: string;
+  altEmergencyContact: string;
+  parentEmail: string;
+  appliances: string[];
+  otherAppliances: string;
+};
+
+// Utility for appliance box styling
+const applianceBoxClass = (selected: boolean) =>
+  `cursor-pointer rounded border p-3 flex flex-col gap-1 items-start transition-all ${selected ? 'border-blue-600 bg-blue-50 shadow' : 'border-gray-300 bg-white hover:border-blue-400'}`;
+
 export default function Home() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     studentName: "",
     studentNumber: "",
     studentDOB: "",
+    studentBuilding: "",
     studentRoom: "",
-    studentEmail: "",
     studentSignature: "",
     parentName: "",
     parentContact: "",
@@ -25,12 +48,39 @@ export default function Home() {
     parentRelation: "",
     altEmergencyName: "",
     altEmergencyContact: "",
-    studentBuilding: "",
+    parentEmail: "",
+    appliances: [], // array of selected appliance keys
+    otherAppliances: "", // free text input
   });
   const [showModal, setShowModal] = useState(false);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sigPadRef = useRef<any>(null);
+  const [otherApplianceCost, setOtherApplianceCost] = useState<string>("");
+  // Calculate total fee
+  const applianceFeeMap: Record<string, number> = {
+    hairDryer: 600,
+    hairIron: 600,
+    clothesSteamer: 600,
+    airPurifier: 800,
+    dehumidifier: 800,
+    handheldVacuum: 800,
+    deskFan: 800,
+    rechargeableFan: 400,
+    airCooler: 1200,
+    kettle: 600,
+    riceCooker: 600,
+    coffeeMaker: 600,
+    blender: 600,
+    sandwichMaker: 600,
+    airFryer: 800,
+    refrigerator: 1800,
+    escooter: 1200,
+    smartHome: 1200,
+    projector: 1200,
+    extraLaptop: 2000,
+  };
+  const totalApplianceFee = form.appliances.reduce((sum, key) => sum + (applianceFeeMap[key] || 0), 0) + (otherApplianceCost ? Number(otherApplianceCost) || 0 : 0);
 
   const clearSignature = () => {
     sigPadRef.current?.clear();
@@ -71,16 +121,95 @@ export default function Home() {
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    // Example: Center student name at (300, 700)
-    drawCenteredText(
-      firstPage,
-      form.studentName || "Sample Name",
-      300,
-      700,
-      font,
-      18,
-      rgb(0, 0, 0)
-    );
+    // Helper for y conversion
+    const y = (v: number) => 791 - v;
+    // Name (left-anchored)
+    firstPage.drawText(form.studentName || "", { x: 90, y: y(63), size: 12, font, color: rgb(0, 0, 0) });
+    // Student ID (left-anchored)
+    firstPage.drawText(form.studentNumber || "", { x: 338, y: y(63), size: 12, font, color: rgb(0, 0, 0) });
+    // Building + Room (left-anchored)
+    firstPage.drawText(`${form.studentBuilding} ${form.studentRoom}`.trim(), { x: 495, y: y(63), size: 12, font, color: rgb(0, 0, 0) });
+    // Email (left-anchored)
+    firstPage.drawText(form.parentEmail || "", { x: 127, y: y(86), size: 12, font, color: rgb(0, 0, 0) });
+    // Submission date (left-anchored, y set to 86)
+    firstPage.drawText(getToday(), { x: 460, y: y(86), size: 12, font, color: rgb(0, 0, 0) });
+    // Signature (centered over printed name, y reduced by 7)
+    if (signatureData) {
+      const signatureImage = await pdfDoc.embedPng(signatureData);
+      firstPage.drawImage(signatureImage, {
+        x: 310 - 60, // center at 310, width 120
+        y: y(750) - 7,
+        width: 120,
+        height: 40,
+      });
+    }
+    // Printed name under signature (centered, y increased by 7 again)
+    drawCenteredText(firstPage, form.studentName || "", 310, y(750) - 11 + 7, font, 12, rgb(0, 0, 0));
+    // Other appliances (anchored left)
+    if (form.otherAppliances) {
+      firstPage.drawText(form.otherAppliances, { x: 60, y: y(647), size: 12, font, color: rgb(0, 0, 0) });
+    }
+    // Total paid (centered)
+    drawCenteredText(firstPage, totalApplianceFee.toLocaleString(), 262, y(676), font, 12, rgb(0, 0, 0));
+    // Free-charge item checkmarks (centered)
+    const freeChargeChecks = [
+      { key: "laptop", x: 125, y: 389 },
+      { key: "printer", x: 239, y: 389 },
+      { key: "tablet", x: 322, y: 389 },
+      { key: "studyLamp", x: 404, y: 389 },
+    ];
+    freeChargeChecks.forEach(item => {
+      if (form.appliances.includes(item.key)) {
+        drawCenteredText(firstPage, "/", item.x, y(item.y), font, 11, rgb(0, 0, 0));
+      }
+    });
+    // Personal Convenience & Comfort checkmarks
+    const comfortKeys = [
+      "hairDryer",
+      "hairIron",
+      "clothesSteamer",
+      "airPurifier",
+      "dehumidifier",
+      "handheldVacuum",
+      "deskFan",
+      "rechargeableFan",
+      "airCooler",
+    ];
+    const comfortYs = [449, 461, 473, 485, 503, 521, 543, 571, 591];
+    comfortKeys.forEach((key, i) => {
+      if (form.appliances.includes(key)) {
+        drawCenteredText(firstPage, "/", 262, y(comfortYs[i]), font, 11, rgb(0, 0, 0));
+      }
+    });
+    // Food and Beverage Appliances checkmarks
+    const foodKeys = [
+      "kettle",
+      "riceCooker",
+      "coffeeMaker",
+      "blender",
+      "sandwichMaker",
+      "airFryer",
+      "refrigerator",
+    ];
+    const foodYs = [462, 474, 487, 498, 510, 522, 539];
+    foodKeys.forEach((key, i) => {
+      if (form.appliances.includes(key)) {
+        drawCenteredText(firstPage, "/", 522, y(foodYs[i]), font, 11, rgb(0, 0, 0));
+      }
+    });
+    // Tech & Entertainment Appliances checkmarks
+    const techKeys = [
+      "escooter",
+      "smartHome",
+      "projector",
+      "extraLaptop",
+    ];
+    const techYs = [607, 625, 642, 672];
+    techKeys.forEach((key, i) => {
+      if (form.appliances.includes(key)) {
+        drawCenteredText(firstPage, "/", 522, y(techYs[i]), font, 11, rgb(0, 0, 0));
+      }
+    });
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
     const link = document.createElement("a");
@@ -114,7 +243,7 @@ export default function Home() {
       200,
       370,
       font,
-      14,
+      12,
       rgb(0, 0, 0)
     );
     // Date
@@ -124,7 +253,7 @@ export default function Home() {
       450,
       370,
       font,
-      14,
+      12,
       rgb(0, 0, 0)
     );
     const pdfBytes = await pdfDoc.save();
@@ -164,7 +293,7 @@ export default function Home() {
       200,
       197,
       font,
-      14,
+      12,
       rgb(0, 0, 0)
     );
     // Date
@@ -174,7 +303,7 @@ export default function Home() {
       450,
       197,
       font,
-      14,
+      12,
       rgb(0, 0, 0)
     );
     const pdfBytes = await pdfDoc.save();
@@ -210,7 +339,7 @@ export default function Home() {
       211,
       98,
       font,
-      14,
+      12,
       rgb(0, 0, 0)
     );
     // Date
@@ -220,7 +349,7 @@ export default function Home() {
       471,
       98,
       font,
-      14,
+      12,
       rgb(0, 0, 0)
     );
     // Draw check marks
@@ -233,6 +362,56 @@ export default function Home() {
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `Data_Privacy_Policy_${form.studentNumber || "1234"}_${form.studentName || "Sample"}.pdf`;
+    link.click();
+  };
+
+  // Download filled Consent Form (single page, custom fields)
+  const downloadConsentForm = async () => {
+    const url = "/forms/10. Consent Form.pdf";
+    const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const pages = pdfDoc.getPages();
+    const page = pages[0]; // single page
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    // Parent name
+    drawCenteredText(page, form.parentName, 263, 640, font, 12, rgb(0, 0, 0));
+    // Student name
+    drawCenteredText(page, form.studentName, 420, 617, font, 12, rgb(0, 0, 0));
+    // Date of birth
+    drawCenteredText(page, form.studentDOB, 218, 599, font, 12, rgb(0, 0, 0));
+    // Building (y + 2)
+    drawCenteredText(page, form.studentBuilding, 338, 582, font, 12, rgb(0, 0, 0));
+    // Parent contact number (y + 3)
+    drawCenteredText(page, form.parentContact, 275, 442, font, 12, rgb(0, 0, 0));
+    // Alt contact number (y + 3)
+    drawCenteredText(page, form.parentAltContact, 475, 442, font, 12, rgb(0, 0, 0));
+    // Parent email
+    page.drawText(form.parentEmail || "", { x: 187, y: 418, size: 12, font, color: rgb(0, 0, 0) });
+    // Relation (y + 3)
+    drawCenteredText(page, form.parentRelation, 242, 397, font, 12, rgb(0, 0, 0));
+    // Alt emergency person name (y + 1)
+    page.drawText(form.altEmergencyName || "", { x: 143, y: 349, size: 12, font, color: rgb(0, 0, 0) });
+    // Alt emergency person contact (y + 1)
+    drawCenteredText(page, form.altEmergencyContact, 451, 349, font, 12, rgb(0, 0, 0));
+    // Signature image
+    if (signatureData) {
+      const signatureImage = await pdfDoc.embedPng(signatureData);
+      page.drawImage(signatureImage, {
+        x: 182, // center at 242 with width 120
+        y: 81,
+        width: 120,
+        height: 40,
+      });
+    }
+    // Printed name (no student id)
+    drawCenteredText(page, form.studentName, 242, 81, font, 12, rgb(0, 0, 0));
+    // Date
+    drawCenteredText(page, getToday(), 439, 81, font, 12, rgb(0, 0, 0));
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Consent_Form_${form.studentNumber || "1234"}_${form.studentName || "Sample"}.pdf`;
     link.click();
   };
 
@@ -315,19 +494,7 @@ export default function Home() {
                 required
               />
             </div>
-            <div>
-              <label className="block font-medium mb-1 text-gray-900" htmlFor="studentEmail">Email Address</label>
-              <input
-                type="email"
-                id="studentEmail"
-                name="studentEmail"
-                value={form.studentEmail}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
-            </div>
-            {/* Remove submission date field from the form UI */}
+            {/* Remove student email field from the form UI */}
             <div className="col-span-3">
               <label className="block font-medium mb-1 text-gray-900">Signature</label>
               <div className="bg-gray-100 border rounded p-2 flex flex-col items-center">
@@ -409,6 +576,18 @@ export default function Home() {
                 required
               />
             </div>
+            <div>
+              <label className="block font-medium mb-1 text-gray-900" htmlFor="parentEmail">Email Address</label>
+              <input
+                type="email"
+                id="parentEmail"
+                name="parentEmail"
+                value={form.parentEmail || ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2"
+                required
+              />
+            </div>
           </div>
         </div>
         {/* Alternate Emergency Person Section (moved to last) */}
@@ -439,6 +618,206 @@ export default function Home() {
                 required
               />
             </div>
+          </div>
+        </div>
+        {/* Appliance Selection Section */}
+        <div>
+          <h2 className="text-lg font-bold mb-4 col-span-3">Appliance Declaration</h2>
+          <div className="mb-2 font-semibold">Free-Charge Items</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+            {[
+              { key: "laptop", label: "Laptop or Desktop" },
+              { key: "printer", label: "Printer" },
+              { key: "tablet", label: "Tablet" },
+              { key: "studyLamp", label: "Study Lamp" },
+            ].map(item => {
+              const selected = form.appliances.includes(item.key);
+              return (
+                <div
+                  key={item.key}
+                  className={applianceBoxClass(selected)}
+                  onClick={() => {
+                    setForm(f => ({
+                      ...f,
+                      appliances: selected
+                        ? f.appliances.filter(k => k !== item.key)
+                        : [...f.appliances, item.key],
+                    }));
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-pressed={selected}
+                  onKeyDown={e => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                      e.preventDefault();
+                      setForm(f => ({
+                        ...f,
+                        appliances: selected
+                          ? f.appliances.filter(k => k !== item.key)
+                          : [...f.appliances, item.key],
+                      }));
+                    }
+                  }}
+                >
+                  <span className="font-medium">{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mb-2 font-semibold">Personal Convenience & Comfort</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+            {[
+              { key: "hairDryer", label: "Hair Dryer", fee: 600 },
+              { key: "hairIron", label: "Hair Iron", fee: 600 },
+              { key: "clothesSteamer", label: "Clothes Steamer", fee: 600 },
+              { key: "airPurifier", label: "Air Purifier", fee: 800 },
+              { key: "dehumidifier", label: "Dehumidifier (max 60W)", fee: 800 },
+              { key: "handheldVacuum", label: "Handheld Vacuum", fee: 800 },
+              { key: "deskFan", label: "Conventional Elec Fan (Desk/Stand Fan 30W-60W max)", fee: 800 },
+              { key: "rechargeableFan", label: "Rechargeable Elec Fan (6W-29W)", fee: 400 },
+              { key: "airCooler", label: "Air Cooler", fee: 1200 },
+            ].map(item => {
+              const selected = form.appliances.includes(item.key);
+              return (
+                <div
+                  key={item.key}
+                  className={applianceBoxClass(selected)}
+                  onClick={() => {
+                    setForm(f => ({
+                      ...f,
+                      appliances: selected
+                        ? f.appliances.filter(k => k !== item.key)
+                        : [...f.appliances, item.key],
+                    }));
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-pressed={selected}
+                  onKeyDown={e => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                      e.preventDefault();
+                      setForm(f => ({
+                        ...f,
+                        appliances: selected
+                          ? f.appliances.filter(k => k !== item.key)
+                          : [...f.appliances, item.key],
+                      }));
+                    }
+                  }}
+                >
+                  <span className="font-medium">{item.label}</span>
+                  <span className="text-xs text-gray-500">({item.fee})</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mb-2 font-semibold">Food and Beverage Appliances</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+            {[
+              { key: "kettle", label: "Electric Kettle", fee: 600 },
+              { key: "riceCooker", label: "Rice Cooker", fee: 600 },
+              { key: "coffeeMaker", label: "Coffee Maker", fee: 600 },
+              { key: "blender", label: "Portable Blender", fee: 600 },
+              { key: "sandwichMaker", label: "Sandwich Maker", fee: 600 },
+              { key: "airFryer", label: "Air Fryer", fee: 800 },
+              { key: "refrigerator", label: "Refrigerator (max 5 cu.ft; 1 ref/room)", fee: 1800 },
+            ].map(item => {
+              const selected = form.appliances.includes(item.key);
+              return (
+                <div
+                  key={item.key}
+                  className={applianceBoxClass(selected)}
+                  onClick={() => {
+                    setForm(f => ({
+                      ...f,
+                      appliances: selected
+                        ? f.appliances.filter(k => k !== item.key)
+                        : [...f.appliances, item.key],
+                    }));
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-pressed={selected}
+                  onKeyDown={e => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                      e.preventDefault();
+                      setForm(f => ({
+                        ...f,
+                        appliances: selected
+                          ? f.appliances.filter(k => k !== item.key)
+                          : [...f.appliances, item.key],
+                      }));
+                    }
+                  }}
+                >
+                  <span className="font-medium">{item.label}</span>
+                  <span className="text-xs text-gray-500">({item.fee})</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mb-2 font-semibold">Tech & Entertainment Appliances</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+            {[
+              { key: "escooter", label: "E-bike or E-Scooter", fee: 1200 },
+              { key: "smartHome", label: "Smart Home Devices (speaker, etc.)", fee: 1200 },
+              { key: "projector", label: "Portable Projector", fee: 1200 },
+              { key: "extraLaptop", label: "Additional laptop/desktop, monitors, non-handheld gaming console, etc.", fee: 2000 },
+            ].map(item => {
+              const selected = form.appliances.includes(item.key);
+              return (
+                <div
+                  key={item.key}
+                  className={applianceBoxClass(selected)}
+                  onClick={() => {
+                    setForm(f => ({
+                      ...f,
+                      appliances: selected
+                        ? f.appliances.filter(k => k !== item.key)
+                        : [...f.appliances, item.key],
+                    }));
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-pressed={selected}
+                  onKeyDown={e => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                      e.preventDefault();
+                      setForm(f => ({
+                        ...f,
+                        appliances: selected
+                          ? f.appliances.filter(k => k !== item.key)
+                          : [...f.appliances, item.key],
+                      }));
+                    }
+                  }}
+                >
+                  <span className="font-medium">{item.label}</span>
+                  <span className="text-xs text-gray-500">({item.fee})</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mb-2 font-semibold">Other Appliances</div>
+          <input
+            type="text"
+            name="otherAppliances"
+            value={form.otherAppliances}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2 mb-2"
+            placeholder="Please declare other items not listed above"
+          />
+          <input
+            type="number"
+            min="0"
+            step="any"
+            value={otherApplianceCost}
+            onChange={e => setOtherApplianceCost(e.target.value)}
+            className="w-full border rounded px-3 py-2 mb-2"
+            placeholder="Optional: Cost for other appliances (if applicable)"
+          />
+          <div className="mt-4 text-lg font-bold text-right">
+            Total Amount to be Paid: <span className="text-red-600">{totalApplianceFee.toLocaleString()}</span>
           </div>
         </div>
         {/* Choice of Appliance will be added later */}
@@ -476,6 +855,13 @@ export default function Home() {
               className="w-full bg-pink-600 text-white py-2 rounded font-semibold hover:bg-pink-700 transition mb-4"
             >
               Download Data Privacy Policy
+            </button>
+            <button
+              type="button"
+              onClick={downloadConsentForm}
+              className="w-full bg-orange-600 text-white py-2 rounded font-semibold hover:bg-orange-700 transition mb-4"
+            >
+              Download Consent Form
             </button>
             {/* Add more download buttons for other PDFs here */}
             <button
