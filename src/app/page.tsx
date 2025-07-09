@@ -116,26 +116,26 @@ export default function Home() {
   }, []);
   // Calculate total fee
   const applianceFeeMap: Record<string, number> = {
-    hairDryer: 600,
-    hairIron: 600,
-    clothesSteamer: 600,
-    airPurifier: 800,
-    dehumidifier: 800,
-    handheldVacuum: 800,
-    deskFan: 800,
-    rechargeableFan: 400,
-    airCooler: 1200,
-    kettle: 600,
-    riceCooker: 600,
-    coffeeMaker: 600,
-    blender: 600,
-    sandwichMaker: 600,
-    airFryer: 800,
-    refrigerator: 1800,
-    escooter: 1200,
-    smartHome: 1200,
-    projector: 1200,
-    extraLaptop: 2000,
+    hairDryer: 1500,
+    hairIron: 1500,
+    clothesSteamer: 1500,
+    airPurifier: 2000,
+    dehumidifier: 2000,
+    handheldVacuum: 2000,
+    deskFan: 2000,
+    rechargeableFan: 1000,
+    airCooler: 3000,
+    kettle: 1500,
+    riceCooker: 1500,
+    coffeeMaker: 1500,
+    blender: 1500,
+    sandwichMaker: 1500,
+    airFryer: 2000,
+    refrigerator: 4500,
+    escooter: 3000,
+    smartHome: 3000,
+    projector: 3000,
+    extraLaptop: 5000,
   };
   const totalApplianceFee = form.appliances.reduce((sum, key) => sum + (applianceFeeMap[key] || 0), 0) + (otherApplianceCost ? Number(otherApplianceCost) || 0 : 0);
 
@@ -169,7 +169,7 @@ export default function Home() {
 
   // Example: Download filled Appliance Declaration Form
   const downloadApplianceDeclaration = async (preview = false) => {
-    const url = "/forms/1. URH Appliance Declaration Form (Intersession).pdf";
+    const url = "/forms-2025-1stsem/1. URH Appliance Declaration Form (Semestral).pdf";
     const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const pages = pdfDoc.getPages();
@@ -275,7 +275,7 @@ export default function Home() {
 
   // Download filled URH Residency Terms & Conditions (page 3)
   const downloadTermsAndConditions = async (preview = false) => {
-    const url = "/forms/7. URH Residency TERMS & CONDITIONS.pdf";
+    const url = "/forms-2025-1stsem/7. URH Residency TERMS & CONDITIONS (3).pdf";
     const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const pages = pdfDoc.getPages();
@@ -322,7 +322,7 @@ export default function Home() {
 
   // Download filled Residency Agreement - Intersession (page 3)
   const downloadResidencyAgreement = async (preview = false) => {
-    const url = "/forms/8. Residency Agreement - Intersession.pdf";
+    const url = "/forms-2025-1stsem/8. Residency Agreement - 1st SEM SY 25-26.pdf";
     const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const pages = pdfDoc.getPages();
@@ -337,7 +337,7 @@ export default function Home() {
       const signatureImage = await pdfDoc.embedPng(signatureData);
       page.drawImage(signatureImage, {
         x: 140, // center at 200 with width 120
-        y: 197,
+        y: 147,
         width: 120,
         height: 40,
       });
@@ -347,7 +347,7 @@ export default function Home() {
       page,
       `${getStudentFullNameDisplay()} (${form.studentNumber})`,
       200,
-      197,
+      147,
       font,
       12,
       rgb(0, 0, 0)
@@ -357,7 +357,7 @@ export default function Home() {
       page,
       getToday(),
       450,
-      197,
+      147,
       font,
       12,
       rgb(0, 0, 0)
@@ -373,7 +373,7 @@ export default function Home() {
 
   // Download filled URH Data Privacy Policy (single page, with checks)
   const downloadDataPrivacyPolicy = async (preview = false) => {
-    const url = "/forms/9. URH Data Privacy Policy.pdf";
+    const url = "/forms-2025-1stsem/9. URH Data Privacy Policy (3).pdf";
     const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const pages = pdfDoc.getPages();
@@ -425,7 +425,7 @@ export default function Home() {
 
   // Download filled Consent Form (single page, custom fields)
   const downloadConsentForm = async (preview = false) => {
-    const url = "/forms/10. Consent Form.pdf";
+    const url = "/forms-2025-1stsem/10. Consent Form (3).pdf";
     const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const pages = pdfDoc.getPages();
@@ -631,6 +631,42 @@ export default function Home() {
                 />
               </div>
               <div>
+                <label className="block font-medium mb-2 text-gray-800" htmlFor="studentEmail">Email Address</label>
+                <input
+                  type="email"
+                  id="studentEmail"
+                  name="studentEmail"
+                  value={form.studentEmail || ""}
+                  onChange={handleChange}
+                  className={
+                    `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
+                    (darkMode
+                      ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
+                      : 'bg-white/80 placeholder:text-gray-500')
+                  }
+                  placeholder="Email Address"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-2 text-gray-800" htmlFor="studentRoom">Room</label>
+                <input
+                  type="text"
+                  id="studentRoom"
+                  name="studentRoom"
+                  value={form.studentRoom}
+                  onChange={handleChange}
+                  className={
+                    `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
+                    (darkMode
+                      ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
+                      : 'bg-white/80 placeholder:text-gray-500')
+                  }
+                  placeholder="Room No."
+                  required
+                />
+              </div>
+              <div>
                 <label className="block font-medium mb-2 text-gray-800" htmlFor="studentBuilding">Building</label>
                 <select
                   id="studentBuilding"
@@ -652,43 +688,6 @@ export default function Home() {
                   <option value="University Dorm South">University Dorm South</option>
                   <option value="International Residence Hall">International Residence Hall</option>
                 </select>
-              </div>
-              <div>
-                <label className="block font-medium mb-2 text-gray-800" htmlFor="studentRoom">Room</label>
-                <input
-                  type="text"
-                  id="studentRoom"
-                  name="studentRoom"
-                  value={form.studentRoom}
-                  onChange={handleChange}
-                  className={
-                    `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
-                    (darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
-                  }
-                  placeholder="Room No."
-                  required
-                />
-              </div>
-              {/* Remove student email field from the form UI */}
-              <div>
-                <label className="block font-medium mb-2 text-gray-800" htmlFor="studentEmail">Email Address</label>
-                <input
-                  type="email"
-                  id="studentEmail"
-                  name="studentEmail"
-                  value={form.studentEmail || ""}
-                  onChange={handleChange}
-                  className={
-                    `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
-                    (darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
-                  }
-                  placeholder="Email Address"
-                  required
-                />
               </div>
               <div className="md:col-span-3">
                 <label className="block font-medium mb-2 text-gray-800">Signature</label>
@@ -956,15 +955,15 @@ export default function Home() {
             <div className="mb-2 font-semibold">Personal Convenience & Comfort</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
               {[
-                { key: "hairDryer", label: "Hair Dryer", fee: 600 },
-                { key: "hairIron", label: "Hair Iron", fee: 600 },
-                { key: "clothesSteamer", label: "Clothes Steamer", fee: 600 },
-                { key: "airPurifier", label: "Air Purifier", fee: 800 },
-                { key: "dehumidifier", label: "Dehumidifier (max 60W)", fee: 800 },
-                { key: "handheldVacuum", label: "Handheld Vacuum", fee: 800 },
-                { key: "deskFan", label: "Conventional Elec Fan (Desk/Stand Fan 30W-60W max)", fee: 800 },
-                { key: "rechargeableFan", label: "Rechargeable Elec Fan (6W-29W)", fee: 400 },
-                { key: "airCooler", label: "Air Cooler", fee: 1200 },
+                { key: "hairDryer", label: "Hair Dryer", fee: 1500 },
+                { key: "hairIron", label: "Hair Iron", fee: 1500 },
+                { key: "clothesSteamer", label: "Clothes Steamer", fee: 1500 },
+                { key: "airPurifier", label: "Air Purifier", fee: 2000 },
+                { key: "dehumidifier", label: "Dehumidifier (max 60Watts)", fee: 2000 },
+                { key: "handheldVacuum", label: "Handheld Vacuum", fee: 2000 },
+                { key: "deskFan", label: "Conventional Elec Fan (Desk/Stand Fan 30Watts-60Watts max)", fee: 2000 },
+                { key: "rechargeableFan", label: "Rechargeable Elec Fan (6Watts-29Watts)", fee: 1000 },
+                { key: "airCooler", label: "Air Cooler", fee: 3000 },
               ].map(item => {
                 const selected = form.appliances.includes(item.key);
                 return (
@@ -1000,16 +999,16 @@ export default function Home() {
                 );
               })}
             </div>
-            <div className="mb-2 font-semibold">Food and Beverage Appliances</div>
+            <div className="mb-2 font-semibold">Food and Beverage Appliances <span className='font-normal'>(must be used only in Pantries, except for ref, which must stay in the room)</span></div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
               {[
-                { key: "kettle", label: "Electric Kettle", fee: 600 },
-                { key: "riceCooker", label: "Rice Cooker", fee: 600 },
-                { key: "coffeeMaker", label: "Coffee Maker", fee: 600 },
-                { key: "blender", label: "Portable Blender", fee: 600 },
-                { key: "sandwichMaker", label: "Sandwich Maker", fee: 600 },
-                { key: "airFryer", label: "Air Fryer", fee: 800 },
-                { key: "refrigerator", label: "Refrigerator (max 5 cu.ft; 1 ref/room)", fee: 1800 },
+                { key: "kettle", label: "Electric Kettle", fee: 1500 },
+                { key: "riceCooker", label: "Rice Cooker", fee: 1500 },
+                { key: "coffeeMaker", label: "Coffee Maker", fee: 1500 },
+                { key: "blender", label: "Portable Blender", fee: 1500 },
+                { key: "sandwichMaker", label: "Sandwich Maker", fee: 1500 },
+                { key: "airFryer", label: "Air Fryer", fee: 2000 },
+                { key: "refrigerator", label: "Refrigerator (max 5 cu.ft; 1 ref/room)", fee: 4500 },
               ].map(item => {
                 const selected = form.appliances.includes(item.key);
                 return (
@@ -1048,10 +1047,10 @@ export default function Home() {
             <div className="mb-2 font-semibold">Tech & Entertainment Appliances</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
               {[
-                { key: "escooter", label: "E-bike or E-Scooter", fee: 1200 },
-                { key: "smartHome", label: "Smart Home Devices (speaker, etc.)", fee: 1200 },
-                { key: "projector", label: "Portable Projector", fee: 1200 },
-                { key: "extraLaptop", label: "Additional laptop/desktop, monitors, non-handheld gaming console, etc.", fee: 2000 },
+                { key: "escooter", label: "E-bike or E-Scooter", fee: 3000 },
+                { key: "smartHome", label: "Smart Home Devices (speaker, etc.)", fee: 3000 },
+                { key: "projector", label: "Portable Projector", fee: 3000 },
+                { key: "extraLaptop", label: "Additional laptop / desktop, monitors, non handheld gaming console, etc.", fee: 5000 },
               ].map(item => {
                 const selected = form.appliances.includes(item.key);
                 return (
