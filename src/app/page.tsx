@@ -701,7 +701,7 @@ export default function Home() {
                 >
                   <SignaturePad
                     ref={sigPadRef}
-                    penColor={darkMode ? "#fff" : "black"}
+                    penColor="black"
                     canvasProps={{
                       width: sigPadWidth,
                       height: 120,
