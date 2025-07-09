@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-var-requires
 let pdfjsLib: any = null;
 if (typeof window !== "undefined") {
-  pdfjsLib = require("pdfjs-dist/legacy/build/pdf");
+  //pdfjsLib = require("pdfjs-dist/legacy/build/pdf");
   pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 }
 
