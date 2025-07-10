@@ -484,7 +484,7 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Generate all PDFs as blobs for preview
+    // Generate all PDFs as blobs for preview only (no download)
     const pdfFns = [
       downloadApplianceDeclaration,
       downloadTermsAndConditions,
@@ -492,12 +492,9 @@ export default function Home() {
       downloadDataPrivacyPolicy,
       downloadConsentForm,
     ];
-    // setPreviewBlobs([]); // Clear previous previews
-    // const blobs: Blob[] = [];
     for (const fn of pdfFns) {
-      await fn(); // no preview flag
+      await fn(true); // pass preview flag to prevent download
     }
-    // setPreviewBlobs(blobs);
     setShowPreviewModal(true);
   };
 
