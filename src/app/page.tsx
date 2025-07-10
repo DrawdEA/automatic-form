@@ -14,7 +14,6 @@ import { useState as useReactState } from "react";
 // Dynamically import SignaturePad to avoid SSR issues (move outside component)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SignaturePad = dynamic<any>(() => import("react-signature-canvas"), { ssr: false });
-const PdfPreviewer = dynamic(() => import("../components/PdfPreviewer"), { ssr: false });
 
 type FormState = {
   studentFirstName: string;
@@ -1239,7 +1238,7 @@ export default function Home() {
               (darkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200 text-gray-900')
             }>
               <h2 className="text-xl font-bold mb-4">Double check your filled forms below before downloading.</h2>
-              <PdfPreviewer pdfBlobs={previewBlobs} />
+              <p>Generating Preview</p>
               <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
                 <button
                   type="button"
