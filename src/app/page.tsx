@@ -537,7 +537,7 @@ export default function Home() {
           className="text-3xl font-extrabold mb-8 tracking-tight text-blue-700 transition-colors duration-300"
           style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
         >
-          URH Residency Form Automation
+          URH Residency Form in Minutes, not Hours :)
         </h1>
         <form
           onSubmit={handleSubmit}
@@ -566,7 +566,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Last Name"
                   required
@@ -584,7 +584,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="First Name"
                   required
@@ -602,7 +602,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Student No."
                   required
@@ -620,7 +620,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="mm/dd/yyyy"
                   required
@@ -638,7 +638,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Email Address"
                   required
@@ -656,7 +656,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Room No."
                   required
@@ -673,7 +673,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   required
                 >
@@ -728,7 +728,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Parent Last Name"
                   required
@@ -746,7 +746,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Parent First Name"
                   required
@@ -764,7 +764,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Contact No."
                   required
@@ -782,7 +782,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Alternative Contact No."
                   required
@@ -800,7 +800,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Address"
                   required
@@ -818,7 +818,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Relation"
                   required
@@ -836,7 +836,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Parent Email Address"
                   required
@@ -860,7 +860,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Alt. Emergency Last Name"
                   required
@@ -878,7 +878,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Alt. Emergency First Name"
                   required
@@ -896,7 +896,7 @@ export default function Home() {
                     `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                     (darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white/80 placeholder:text-gray-500')
+                      : 'bg-white placeholder:text-gray-500')
                   }
                   placeholder="Contact No."
                   required
@@ -1093,7 +1093,7 @@ export default function Home() {
                   `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                   (darkMode
                     ? 'bg-gray-900 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                    : 'bg-white/80 placeholder:text-gray-500')
+                    : 'bg-white placeholder:text-gray-500')
                 }
                 placeholder="Please declare other items not listed above"
               />
@@ -1107,7 +1107,7 @@ export default function Home() {
                   `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                   (darkMode
                     ? 'bg-gray-900 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                    : 'bg-white/80 placeholder:text-gray-500')
+                    : 'bg-white placeholder:text-gray-500')
                 }
                 placeholder="Optional: Cost for other appliances (if applicable)"
               />
