@@ -10,6 +10,8 @@ import { useRef } from "react";
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import Head from "next/head";
 import { useState as useReactState } from "react";
+// Import SignaturePad type for refs
+import type SignaturePadType from "react-signature-canvas";
 
 // Dynamically import SignaturePad to avoid SSR issues (move outside component)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,7 +30,6 @@ type FormState = {
   parentLastName: string;
   parentContact: string;
   parentAltContact: string;
-  parentAddress: string;
   parentRelation: string;
   altEmergencyFirstName: string;
   altEmergencyLastName: string;
@@ -75,7 +76,6 @@ export default function Home() {
     parentLastName: "",
     parentContact: "",
     parentAltContact: "",
-    parentAddress: "",
     parentRelation: "",
     altEmergencyFirstName: "",
     altEmergencyLastName: "",
@@ -84,6 +84,8 @@ export default function Home() {
     appliances: [], // array of selected appliance keys
     otherAppliances: "", // free text input
   });
+  // Add state for other appliance cost
+  const [otherApplianceCost, setOtherApplianceCost] = useState<string>("");
   // Restore utility functions
   const getStudentFullName = () => `${form.studentLastName}, ${form.studentFirstName}`;
   const getStudentFullNameDisplay = () => `${form.studentFirstName} ${form.studentLastName}`;
@@ -93,14 +95,15 @@ export default function Home() {
     const today = new Date();
     return today.toISOString().slice(0, 10);
   };
-  const [showModal, setShowModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   // const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   // const [previewBlobs, setPreviewBlobs] = useState<Blob[]>([]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sigPadRef = useRef<any>(null);
-  const [otherApplianceCost, setOtherApplianceCost] = useState<string>("");
+  // Parent signature state
+  const [parentSignatureData, setParentSignatureData] = useState<string | null>(null);
+  const sigPadRef = useRef<SignaturePadType>(null);
+  const parentSigPadRef = useRef<SignaturePadType>(null);
   const [sigPadWidth, setSigPadWidth] = useState(400);
   const sigPadContainerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -450,9 +453,9 @@ export default function Home() {
     page.drawText(getAltEmergencyFullNameDisplay() || "", { x: 143, y: 349, size: 12, font, color: rgb(0, 0, 0) });
     // Alt emergency person contact (y + 1)
     drawCenteredText(page, form.altEmergencyContact, 451, 349, font, 12, rgb(0, 0, 0));
-    // Signature image
-    if (signatureData) {
-      const signatureImage = await pdfDoc.embedPng(signatureData);
+    // Parent Signature image
+    if (parentSignatureData) {
+      const signatureImage = await pdfDoc.embedPng(parentSignatureData);
       page.drawImage(signatureImage, {
         x: 182, // center at 242 with width 120
         y: 81,
@@ -460,8 +463,8 @@ export default function Home() {
         height: 40,
       });
     }
-    // Printed name (no student id)
-    drawCenteredText(page, getStudentFullNameDisplay(), 242, 81, font, 12, rgb(0, 0, 0));
+    // Printed parent name under signature
+    drawCenteredText(page, getParentFullNameDisplay(), 242, 81, font, 12, rgb(0, 0, 0));
     // Date
     drawCenteredText(page, getToday(), 439, 81, font, 12, rgb(0, 0, 0));
     const pdfBytes = await pdfDoc.save();
@@ -474,14 +477,6 @@ export default function Home() {
   };
 
   // Download all PDFs
-  const downloadAll = async () => {
-    await downloadApplianceDeclaration();
-    await downloadTermsAndConditions();
-    await downloadResidencyAgreement();
-    await downloadDataPrivacyPolicy();
-    await downloadConsentForm();
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Generate all PDFs as blobs for preview only (no download)
@@ -505,6 +500,11 @@ export default function Home() {
   const clearSignature = () => {
     sigPadRef.current?.clear();
     setSignatureData(null);
+  };
+  // Clear parent signature
+  const clearParentSignature = () => {
+    parentSigPadRef.current?.clear();
+    setParentSignatureData(null);
   };
 
   const [darkMode, setDarkMode] = useReactState(false);
@@ -699,7 +699,7 @@ export default function Home() {
                       height: 120,
                       className: `rounded border w-full ` + (darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200')
                     }}
-                    onEnd={() => setSignatureData(sigPadRef.current?.isEmpty() ? null : sigPadRef.current?.toDataURL())}
+                    onEnd={() => setSignatureData(sigPadRef.current?.isEmpty() ? null : (sigPadRef.current?.toDataURL() ?? null))}
                   />
                   <div className="flex gap-2 mt-2">
                     <button type="button" onClick={clearSignature} className="px-4 py-1 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition">Clear</button>
@@ -785,24 +785,7 @@ export default function Home() {
                   required
                 />
               </div>
-              <div>
-                <label className="block font-medium mb-2 text-gray-800" htmlFor="parentAddress">Address</label>
-                <input
-                  type="text"
-                  id="parentAddress"
-                  name="parentAddress"
-                  value={form.parentAddress}
-                  onChange={handleChange}
-                  className={
-                    `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
-                    (darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
-                      : 'bg-white placeholder:text-gray-500')
-                  }
-                  placeholder="Address"
-                  required
-                />
-              </div>
+              {/* REMOVED ADDRESS FIELD */}
               <div>
                 <label className="block font-medium mb-2 text-gray-800" htmlFor="parentRelation">Relation</label>
                 <input
@@ -838,6 +821,31 @@ export default function Home() {
                   placeholder="Parent Email Address"
                   required
                 />
+              </div>
+            </div>
+            {/* Parent Signature Section */}
+            <div className="md:col-span-3 mt-6">
+              <label className="block font-medium mb-2 text-gray-800">Parent Signature</label>
+              <div
+                className={
+                  `border rounded-lg p-4 flex flex-col items-center w-full max-w-xs md:max-w-md mx-auto shadow-sm ` +
+                  (darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200')
+                }
+              >
+                <SignaturePad
+                  ref={parentSigPadRef}
+                  penColor="black"
+                  canvasProps={{
+                    width: sigPadWidth,
+                    height: 120,
+                    className: `rounded border w-full ` + (darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200')
+                  }}
+                  onEnd={() => setParentSignatureData(parentSigPadRef.current?.isEmpty() ? null : (parentSigPadRef.current?.toDataURL() ?? null))}
+                />
+                <div className="flex gap-2 mt-2">
+                  <button type="button" onClick={clearParentSignature} className="px-4 py-1 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition">Clear</button>
+                </div>
+                {!parentSignatureData && <span className="text-xs text-red-500 mt-1">Please provide your signature above.</span>}
               </div>
             </div>
           </div>
@@ -1089,10 +1097,10 @@ export default function Home() {
                 className={
                   `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                   (darkMode
-                    ? 'bg-gray-900 border-gray-700 text-gray-100 placeholder:text-gray-400'
+                    ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
                     : 'bg-white placeholder:text-gray-500')
                 }
-                placeholder="Please declare other items not listed above"
+                placeholder="Other appliances (e.g., portable speaker, gaming console)"
               />
               <input
                 type="number"
@@ -1103,162 +1111,129 @@ export default function Home() {
                 className={
                   `w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder:text-gray-500 ` +
                   (darkMode
-                    ? 'bg-gray-900 border-gray-700 text-gray-100 placeholder:text-gray-400'
+                    ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400'
                     : 'bg-white placeholder:text-gray-500')
                 }
                 placeholder="Optional: Cost for other appliances (if applicable)"
               />
             </div>
-            <div className="mt-4 text-lg font-bold text-right">
-              Total Amount to be Paid: <span className="text-red-600">{totalApplianceFee.toLocaleString()}</span>
+            <div className="flex justify-end items-center mb-6">
+              <span className="text-lg font-bold mr-2">Total Amount to be Paid:</span>
+              <span className="text-lg font-bold" style={{ color: totalApplianceFee > 0 ? '#e53e3e' : '#000' }}>{totalApplianceFee.toLocaleString()}</span>
             </div>
           </div>
-          {/* Choice of Appliance will be added later */}
-          <button
-            type="submit"
-            className={
-              `w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3 rounded-xl font-bold hover:from-blue-600 hover:to-blue-800 transition mt-6 shadow-lg text-lg tracking-wide ` +
-              (darkMode ? 'bg-gradient-to-r from-blue-800 to-blue-900' : '')
-            }
-          >
-            Submit
-          </button>
+          {/* Submit Button */}
+          <div className="md:col-span-3 flex justify-end">
+            <button
+              type="submit"
+              className="px-8 py-3 rounded-lg font-medium shadow text-lg transition bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:text-white dark:hover:bg-blue-800"
+            >
+              Generate All PDFs
+            </button>
+          </div>
         </form>
-        {/* Modal Popup for Downloads */}
-        {showModal && (
-          <div className={
-            `fixed inset-0 flex items-center justify-center z-50 ` +
-            (darkMode
-              ? 'bg-black/70 backdrop-blur-sm'
-              : 'bg-white/70 backdrop-blur-sm')
-          }>
-            <div className={
-              `rounded-lg shadow-lg p-8 max-w-md w-full text-center border ` +
-              (darkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200 text-gray-900')
-            }>
-              <h2 className="text-xl font-bold mb-4">Download Your Filled Forms</h2>
-              <button
-                type="button"
-                onClick={() => downloadApplianceDeclaration()}
-                className={
-                  `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
-                  (darkMode
-                    ? 'bg-green-900 text-green-200 border-green-700 hover:bg-green-800'
-                    : 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200')
-                }
-              >
-                {`Download ADF_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
-              </button>
-              <button
-                type="button"
-                onClick={() => downloadTermsAndConditions()}
-                className={
-                  `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
-                  (darkMode
-                    ? 'bg-blue-900 text-blue-200 border-blue-700 hover:bg-blue-800'
-                    : 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200')
-                }
-              >
-                {`Download TC_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
-              </button>
-              <button
-                type="button"
-                onClick={() => downloadResidencyAgreement()}
-                className={
-                  `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
-                  (darkMode
-                    ? 'bg-purple-900 text-purple-200 border-purple-700 hover:bg-purple-800'
-                    : 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200')
-                }
-              >
-                {`Download RA_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
-              </button>
-              <button
-                type="button"
-                onClick={() => downloadDataPrivacyPolicy()}
-                className={
-                  `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
-                  (darkMode
-                    ? 'bg-pink-900 text-pink-200 border-pink-700 hover:bg-pink-800'
-                    : 'bg-pink-100 text-pink-800 border-pink-200 hover:bg-pink-200')
-                }
-              >
-                {`Download DPP_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
-              </button>
-              <button
-                type="button"
-                onClick={() => downloadConsentForm()}
-                className={
-                  `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
-                  (darkMode
-                    ? 'bg-orange-900 text-orange-200 border-orange-700 hover:bg-orange-800'
-                    : 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200')
-                }
-              >
-                {`Download CF_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
-              </button>
-              <button
-                type="button"
-                onClick={() => downloadAll()}
-                className={
-                  `w-full py-2 rounded font-bold transition mb-4 mt-2 shadow-lg text-base ` +
-                  (darkMode ? 'bg-blue-700 text-white hover:bg-blue-800' : 'bg-blue-600 text-white hover:bg-blue-700')
-                }
-              >
-                Download All
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className={
-                  `w-full py-2 rounded font-semibold transition ` +
-                  (darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-400 text-white hover:bg-gray-500')
-                }
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-        {/* Render preview modal */}
-        {showPreviewModal && (
-          <div className={
-            `fixed inset-0 flex items-center justify-center z-50 ` +
-            (darkMode
-              ? 'bg-black/70 backdrop-blur-sm'
-              : 'bg-white/70 backdrop-blur-sm')
-          }>
-            <div className={
-              `rounded-lg shadow-lg p-8 max-w-2xl w-full text-center overflow-y-auto max-h-[90vh] border ` +
-              (darkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200 text-gray-900')
-            }>
-              <h2 className="text-xl font-bold mb-4">Double check your filled forms below before downloading.</h2>
-              <p>Generating Preview</p>
-              <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
-                <button
-                  type="button"
-                  className={
-                    `px-4 py-2 rounded shadow transition font-semibold ` +
-                    (darkMode ? 'bg-blue-700 text-white hover:bg-blue-800' : 'bg-blue-600 text-white hover:bg-blue-700')
-                  }
-                  onClick={() => { setShowPreviewModal(false); setShowModal(true); }}
-                >
-                  Proceed to Download
-                </button>
-                <button
-                  type="button"
-                  className={
-                    `px-4 py-2 rounded shadow transition font-semibold ` +
-                    (darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-400 text-white hover:bg-gray-500')
-                  }
-                  onClick={() => setShowPreviewModal(false)}
-                >
-                  Back to Form
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+      {showPreviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-2xl max-w-4xl w-full max-h-full overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-6 text-blue-700">Generated PDFs</h2>
+            <div className="text-lg text-gray-700 dark:text-gray-200 mb-6">
+              Your forms are ready! Please proceed to the download modal to download your filled PDFs.
+            </div>
+            <button
+              type="button"
+              className="mt-6 px-8 py-3 rounded-lg font-medium shadow text-lg transition bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              onClick={() => { setShowPreviewModal(false); setShowModal(true); }}
+            >
+              Proceed to Download
+            </button>
+          </div>
+        </div>
+      )}
+      {showModal && (
+        <div className={
+          `fixed inset-0 flex items-center justify-center z-50 ` +
+          (darkMode
+            ? 'bg-black/70 backdrop-blur-sm'
+            : 'bg-white/70 backdrop-blur-sm')
+        }>
+          <div className={
+            `rounded-lg shadow-lg p-8 max-w-md w-full text-center border ` +
+            (darkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200 text-gray-900')
+          }>
+            <h2 className="text-xl font-bold mb-4">Download Your Filled Forms</h2>
+            <button
+              type="button"
+              onClick={() => downloadApplianceDeclaration()}
+              className={
+                `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
+                (darkMode
+                  ? 'bg-green-900 text-green-200 border-green-700 hover:bg-green-800'
+                  : 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200')
+              }
+            >
+              {`Download ADF_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadTermsAndConditions()}
+              className={
+                `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
+                (darkMode
+                  ? 'bg-blue-900 text-blue-200 border-blue-700 hover:bg-blue-800'
+                  : 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200')
+              }
+            >
+              {`Download TC_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadResidencyAgreement()}
+              className={
+                `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
+                (darkMode
+                  ? 'bg-purple-900 text-purple-200 border-purple-700 hover:bg-purple-800'
+                  : 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200')
+              }
+            >
+              {`Download RA_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadDataPrivacyPolicy()}
+              className={
+                `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
+                (darkMode
+                  ? 'bg-pink-900 text-pink-200 border-pink-700 hover:bg-pink-800'
+                  : 'bg-pink-100 text-pink-800 border-pink-200 hover:bg-pink-200')
+              }
+            >
+              {`Download DPP_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadConsentForm()}
+              className={
+                `w-full text-xs py-1 rounded transition mb-2 border font-semibold ` +
+                (darkMode
+                  ? 'bg-orange-900 text-orange-200 border-orange-700 hover:bg-orange-800'
+                  : 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200')
+              }
+            >
+              {`Download CF_${form.studentNumber || 'Student No.'}_${getStudentFullName() || 'Last Name, First Name'}`}
+            </button>
+            <button
+              onClick={() => setShowModal(false)}
+              className={
+                `w-full py-2 rounded font-semibold transition ` +
+                (darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-400 text-white hover:bg-gray-500')
+              }
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
