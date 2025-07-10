@@ -96,7 +96,7 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   // const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [previewBlobs, setPreviewBlobs] = useState<Blob[]>([]);
+  // const [previewBlobs, setPreviewBlobs] = useState<Blob[]>([]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sigPadRef = useRef<any>(null);
@@ -492,15 +492,12 @@ export default function Home() {
       downloadDataPrivacyPolicy,
       downloadConsentForm,
     ];
-    setPreviewBlobs([]); // Clear previous previews
-    const blobs: Blob[] = [];
+    // setPreviewBlobs([]); // Clear previous previews
+    // const blobs: Blob[] = [];
     for (const fn of pdfFns) {
-      const blob = await fn(true); // pass preview flag
-      if (blob) {
-        blobs.push(blob);
-      }
+      await fn(); // no preview flag
     }
-    setPreviewBlobs(blobs);
+    // setPreviewBlobs(blobs);
     setShowPreviewModal(true);
   };
 
